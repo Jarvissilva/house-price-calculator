@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
-import { MultiCheckBoxSelect, RadioInput } from "components/form";
+import { CustomTextInput, MultiCheckBoxSelect, RadioInput } from "components/form";
 import { FileUpload } from "components/form";
 import { SelectInput } from "components/form";
 import { TextInput } from "components/form";
+import PDF from "components/pdf";
 
 export default function Page() {
   const [formData, setFormData] = useState({
@@ -647,13 +648,16 @@ export default function Page() {
             onChange={handleInputChange}
             value={formData.house_type}
           />
-          <TextInput
+          <CustomTextInput
             name="number_of_bedrooms"
             type="number"
             label="Number of Bedrooms"
             placeholder="Enter number"
             onChange={handleInputChange}
             value={formData.number_of_bedrooms}
+            custom_price_val={basePrices.bedroom}
+            setBasePrices={setBasePrices}
+            price_key="bedroom"
           />
           <TextInput
             name="number_of_bathrooms"
@@ -1292,6 +1296,7 @@ export default function Page() {
             )}
           </div>
         </div>
+        <PDF />
       </div>
     </main>
   );
