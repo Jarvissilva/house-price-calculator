@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 export const Label = ({ label, required }) => {
   return (
     <label htmlFor={`i-${label}`} className="capitalize text-sm">
@@ -29,6 +31,54 @@ export const TextInput = ({
         value={value}
         onChange={onChange}
       />
+    </div>
+  );
+};
+export const CustomTextInput = ({
+  name,
+  label,
+  placeholder,
+  type = "text",
+  required = true,
+  value,
+  onChange,
+  custom_price_val,
+  setBasePrices,
+  price_key
+}) => {
+
+  const [showCustomPrice,setShowCustomPrice] = useState(false)
+
+  return (
+    <div className="flex flex-col gap-2">
+     <div className="flex justify-between items-center">
+        <Label label={label} required={required} />
+        <button className="text-blue-600 text-sm" type="button" onClick={() => setShowCustomPrice(!showCustomPrice)}>Set Custom Price</button>
+      </div>
+      <input
+        name={name}
+        id={`i-${label}`}
+        type={type}
+        className="border text-sm outline-none p-2 rounded-md"
+        placeholder={placeholder}
+        required={required}
+        value={value}
+        onChange={onChange}
+      />
+      {showCustomPrice && <><Label label={`Set Custom Price for ${price_key}`} required={required} />
+      <input
+        type="number"
+        id={`i-Set Custom Price for ${price_key}`}
+        className="border text-sm outline-none p-2 rounded-md"
+        required={true}
+        value={custom_price_val}
+        onChange={(e) => {
+          setBasePrices(prevPrices => ({
+            ...prevPrices,
+            [price_key]: e.target.value
+          }));
+        }}
+      /></>}
     </div>
   );
 };
