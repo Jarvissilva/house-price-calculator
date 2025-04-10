@@ -3,7 +3,8 @@
 import { join } from "path";
 import { writeFile } from "fs/promises";
 import { v4 as uuidv4 } from "uuid";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 
 export default async function generatePdf(prices) {
   try {
@@ -175,8 +176,14 @@ export default async function generatePdf(prices) {
     const fileName = `quote-${uuidv4()}.pdf`;
     const filePath = join(process.cwd(), "public", fileName);
     const publicUrl = `/` + fileName;
-
-    const browser = await puppeteer.launch();
+    chromium.setGraphicsMode = false;
+    const browser = await puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true,
+    });
     const page = await browser.newPage();
     await page.setContent(htmlContent, { waitUntil: "domcontentloaded" });
     const pdf = await page.pdf({ format: "A4" });
