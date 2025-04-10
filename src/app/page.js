@@ -1410,7 +1410,24 @@ export default function Page() {
               const res = await generatePdf(prices); // 👈 get correct key
               console.log(res);
               if (res.success) {
-                window.open(res.url, "_blank");
+                const byteArray = new Uint8Array(res.pdf);
+
+                // Create a Blob from the byte array
+                const blob = new Blob([byteArray], { type: "application/pdf" });
+
+                // Create a temporary URL
+                const url = URL.createObjectURL(blob);
+
+                // Create a download link and click it
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "quote.pdf";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+
+                // Revoke the object URL after download
+                URL.revokeObjectURL(url);
               } else {
                 alert(res.message);
               }

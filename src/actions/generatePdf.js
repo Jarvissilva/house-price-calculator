@@ -1,8 +1,4 @@
 "use server";
-
-import { join } from "path";
-import { writeFile } from "fs/promises";
-import { v4 as uuidv4 } from "uuid";
 import puppeteer from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
 
@@ -173,9 +169,6 @@ export default async function generatePdf(prices) {
     </html>
     `;
 
-    const fileName = `quote-${uuidv4()}.pdf`;
-    const filePath = join(process.cwd(), "public", fileName);
-    const publicUrl = `/` + fileName;
     chromium.setGraphicsMode = false;
     const browser = await puppeteer.launch({
       args: chromium.args,
@@ -189,11 +182,10 @@ export default async function generatePdf(prices) {
     const pdf = await page.pdf({ format: "A4" });
 
     await browser.close();
-    await writeFile(filePath, pdf);
 
     return {
       success: true,
-      url: publicUrl,
+      pdf: pdf,
     };
   } catch (error) {
     return {
