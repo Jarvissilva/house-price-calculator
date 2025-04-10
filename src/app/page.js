@@ -1,10 +1,14 @@
 "use client";
 import { useState } from "react";
-import { CustomTextInput, MultiCheckBoxSelect, RadioInput } from "components/form";
+import {
+  CustomTextInput,
+  MultiCheckBoxSelect,
+  RadioInput,
+} from "components/form";
 import { FileUpload } from "components/form";
 import { SelectInput } from "components/form";
 import { TextInput } from "components/form";
-import PDF from "components/pdf";
+import generatePdf from "actions/generatePdf";
 
 export default function Page() {
   const [formData, setFormData] = useState({
@@ -244,69 +248,99 @@ export default function Page() {
     // Property Basics
     if (formData.number_of_bedrooms > 0) {
       const cost = basePrices.bedroom * formData.number_of_bedrooms;
-      temp.push({ name: "Bedrooms", cost });
+      temp.push({ name: "Bedrooms", cost, info: formData.number_of_bedrooms });
       subtotal += cost;
     }
 
     if (formData.number_of_bathrooms > 0) {
       const cost = basePrices.bathroom * formData.number_of_bathrooms;
-      temp.push({ name: "Bathrooms", cost });
+      temp.push({
+        name: "Bathrooms",
+        cost,
+        info: formData.number_of_bathrooms,
+      });
       subtotal += cost;
     }
 
     if (formData.is_utility_room === "yes") {
-      temp.push({ name: "Utility Room", cost: basePrices.utilityRoom });
+      temp.push({
+        name: "Utility Room",
+        cost: basePrices.utilityRoom,
+        info: formData.is_utility_room,
+      });
       subtotal += basePrices.utilityRoom;
     }
 
     // Heating System
     if (formData.heating_system_type) {
       const cost = basePrices.heatingSystem[formData.heating_system_type] || 0;
-      temp.push({ name: "Heating System", cost });
+      temp.push({
+        name: "Heating System",
+        cost,
+        info: formData.heating_system_type,
+      });
       subtotal += cost;
     }
 
     if (formData.heatpump_brand) {
       const cost = basePrices.heatpumpBrand[formData.heatpump_brand] || 0;
-      temp.push({ name: "Heatpump Brand", cost });
+      temp.push({
+        name: "Heatpump Brand",
+        cost,
+        info: formData.heatpump_brand,
+      });
       subtotal += cost;
     }
 
     if (formData.heatpump_size) {
       const cost = basePrices.heatpumpSize * formData.heatpump_size;
-      temp.push({ name: "Heatpump Size", cost });
+      temp.push({ name: "Heatpump Size", cost, info: formData.heatpump_size });
       subtotal += cost;
     }
 
     if (formData.hot_water_cylinder_size) {
       const cost =
         basePrices.hotWaterCylinder[formData.hot_water_cylinder_size] || 0;
-      temp.push({ name: "Water Cylinder", cost });
+      temp.push({
+        name: "Water Cylinder",
+        cost,
+        info: formData.hot_water_cylinder_size,
+      });
       subtotal += cost;
     }
 
     // Heatpump Requirements
     if (formData.heatpump_requirements.length > 0) {
       const requirementsCost = formData.heatpump_requirements.reduce(
-        (total, req) => {
-          return total + (basePrices.heatpumpRequirements[req] || 0);
-        },
+        (total, req) => total + (basePrices.heatpumpRequirements[req] || 0),
         0
       );
-      temp.push({ name: "Heatpump Requirements", cost: requirementsCost });
+      temp.push({
+        name: "Heatpump Requirements",
+        cost: requirementsCost,
+        info: formData.heatpump_requirements,
+      });
       subtotal += requirementsCost;
     }
 
     // Heating Zones
     if (formData.number_of_heating_zones) {
       const cost = basePrices.heatingZones * formData.number_of_heating_zones;
-      temp.push({ name: "Heating Zones", cost });
+      temp.push({
+        name: "Heating Zones",
+        cost,
+        info: formData.number_of_heating_zones,
+      });
       subtotal += cost;
     }
 
     // Smart Controls
     if (formData.is_smart_controls === "yes") {
-      temp.push({ name: "Smart Controls", cost: basePrices.smartControls });
+      temp.push({
+        name: "Smart Controls",
+        cost: basePrices.smartControls,
+        info: formData.is_smart_controls,
+      });
       subtotal += basePrices.smartControls;
     }
 
@@ -316,7 +350,11 @@ export default function Page() {
       formData.quantity_of_radiators
     ) {
       const cost = basePrices.radiator * formData.quantity_of_radiators;
-      temp.push({ name: "Radiators", cost });
+      temp.push({
+        name: "Radiators",
+        cost,
+        info: formData.quantity_of_radiators,
+      });
       subtotal += cost;
     }
 
@@ -327,7 +365,11 @@ export default function Page() {
       const cost =
         basePrices.underfloorHeating *
         formData.square_meters_underfloor_heating;
-      temp.push({ name: "Underfloor Heating", cost });
+      temp.push({
+        name: "Underfloor Heating",
+        cost,
+        info: formData.square_meters_underfloor_heating,
+      });
       subtotal += cost;
     }
 
@@ -336,13 +378,21 @@ export default function Page() {
       if (formData.ventilation_system_type) {
         const cost =
           basePrices.ventilationSystem[formData.ventilation_system_type] || 0;
-        temp.push({ name: "Ventilation System", cost });
+        temp.push({
+          name: "Ventilation System",
+          cost,
+          info: formData.ventilation_system_type,
+        });
         subtotal += cost;
       }
 
       if (formData.number_of_wall_inlets) {
         const cost = basePrices.wallInlet * formData.number_of_wall_inlets;
-        temp.push({ name: "Wall Inlets", cost });
+        temp.push({
+          name: "Wall Inlets",
+          cost,
+          info: formData.number_of_wall_inlets,
+        });
         subtotal += cost;
       }
 
@@ -350,14 +400,22 @@ export default function Page() {
         const cost =
           basePrices.extractVentilationRoom *
           formData.extract_ventilation_rooms.length;
-        temp.push({ name: "Extract Ventilation Rooms", cost });
+        temp.push({
+          name: "Extract Ventilation Rooms",
+          cost,
+          info: formData.extract_ventilation_rooms,
+        });
         subtotal += cost;
       }
 
       if (formData.ventilation_system_brand) {
         const cost =
           basePrices.ventilationBrand[formData.ventilation_system_brand] || 0;
-        temp.push({ name: "Ventilation Brand", cost });
+        temp.push({
+          name: "Ventilation Brand",
+          cost,
+          info: formData.ventilation_system_brand,
+        });
         subtotal += cost;
       }
 
@@ -365,6 +423,7 @@ export default function Page() {
         temp.push({
           name: "Independent Validation",
           cost: basePrices.independentValidation,
+          info: formData.is_independent_validation,
         });
         subtotal += basePrices.independentValidation;
       }
@@ -374,7 +433,11 @@ export default function Page() {
     if (formData.cold_water_storage) {
       const cost =
         basePrices.coldWaterStorage[formData.cold_water_storage] || 0;
-      temp.push({ name: "Cold Water Storage", cost });
+      temp.push({
+        name: "Cold Water Storage",
+        cost,
+        info: formData.cold_water_storage,
+      });
       subtotal += cost;
     }
 
@@ -386,7 +449,11 @@ export default function Page() {
         },
         0
       );
-      temp.push({ name: "Water Appliances", cost: appliancesCost });
+      temp.push({
+        name: "Water Appliances",
+        cost: appliancesCost,
+        info: formData.appliances_requiring_water,
+      });
       subtotal += appliancesCost;
     }
 
@@ -444,32 +511,52 @@ export default function Page() {
       sanitaryCost *= sanitaryMultiplier;
 
       if (sanitaryCost > 0) {
-        temp.push({ name: "Sanitary Ware", cost: sanitaryCost });
+        temp.push({
+          name: "Sanitary Ware",
+          cost: sanitaryCost,
+          info: formData.sanitary_ware,
+        });
         subtotal += sanitaryCost;
       }
     }
 
     // Additional Features
     if (formData.standard_doc_m_wc_pack === "yes") {
-      temp.push({ name: "Doc-M WC Pack", cost: basePrices.docMWcPack });
+      temp.push({
+        name: "Doc-M WC Pack",
+        cost: basePrices.docMWcPack,
+        info: formData.standard_doc_m_wc_pack,
+      });
       subtotal += basePrices.docMWcPack;
     }
 
     if (formData.is_doc_m_pack_shower === "yes") {
-      temp.push({ name: "Doc-M Shower Pack", cost: basePrices.docMShowerPack });
+      temp.push({
+        name: "Doc-M Shower Pack",
+        cost: basePrices.docMShowerPack,
+        info: formData.is_doc_m_pack_shower,
+      });
       subtotal += basePrices.docMShowerPack;
     }
 
     if (formData.qty_additional_hand_rails) {
       const cost = basePrices.handRail * formData.qty_additional_hand_rails;
-      temp.push({ name: "Hand Rails", cost });
+      temp.push({
+        name: "Hand Rails",
+        cost,
+        info: formData.qty_additional_hand_rails,
+      });
       subtotal += cost;
     }
 
     if (formData.qty_additional_drop_down_rails) {
       const cost =
         basePrices.dropDownRail * formData.qty_additional_drop_down_rails;
-      temp.push({ name: "Drop Down Rails", cost });
+      temp.push({
+        name: "Drop Down Rails",
+        cost,
+        info: formData.qty_additional_drop_down_rails,
+      });
       subtotal += cost;
     }
 
@@ -481,18 +568,30 @@ export default function Page() {
         },
         0
       );
-      temp.push({ name: "Fire Safety Equipment", cost: fireSafetyCost });
+      temp.push({
+        name: "Fire Safety Equipment",
+        cost: fireSafetyCost,
+        info: formData.fire_safety_equipment,
+      });
       subtotal += fireSafetyCost;
     }
 
     if (formData.is_fire_proofing === "yes") {
-      temp.push({ name: "Fire Proofing", cost: basePrices.fireProofing });
+      temp.push({
+        name: "Fire Proofing",
+        cost: basePrices.fireProofing,
+        info: formData.is_fire_proofing,
+      });
       subtotal += basePrices.fireProofing;
     }
 
     // Grounds
     if (formData.is_grounds === "yes") {
-      temp.push({ name: "Grounds Work", cost: basePrices.groundsWork });
+      temp.push({
+        name: "Grounds Work",
+        cost: basePrices.groundsWork,
+        info: formData.is_grounds,
+      });
       subtotal += basePrices.groundsWork;
     }
 
@@ -504,10 +603,13 @@ export default function Page() {
         },
         0
       );
-      temp.push({ name: "Landlord Services", cost: landlordServicesCost });
+      temp.push({
+        name: "Landlord Services",
+        cost: landlordServicesCost,
+        info: formData.landlord_services,
+      });
       subtotal += landlordServicesCost;
     }
-
     // Add labor and installation
     const laborCost = subtotal * basePrices.laborMultiplier;
     temp.push({ name: "Labor Costs", cost: laborCost });
@@ -659,13 +761,16 @@ export default function Page() {
             setBasePrices={setBasePrices}
             price_key="bedroom"
           />
-          <TextInput
+          <CustomTextInput
             name="number_of_bathrooms"
             type="number"
             label="Number of Bathrooms"
             placeholder="Enter number"
             onChange={handleInputChange}
             value={formData.number_of_bathrooms}
+            custom_price_val={basePrices.bathroom}
+            setBasePrices={setBasePrices}
+            price_key="bathroom"
           />
 
           <RadioInput
@@ -767,13 +872,17 @@ export default function Page() {
             }
             value={formData.heatpump_requirements}
           />
-          <TextInput
+
+          <CustomTextInput
             name="number_of_heating_zones"
             type="number"
             label="Number of heating zones"
             placeholder="Enter number"
             onChange={handleInputChange}
             value={formData.number_of_heating_zones}
+            custom_price_val={basePrices.heatingZones}
+            setBasePrices={setBasePrices}
+            price_key="heatingZones"
           />
           <RadioInput
             name="is_smart_controls"
@@ -1153,8 +1262,8 @@ export default function Page() {
             Submit
           </button>
         </form>
-        <div className="w-full md:w-[35%]">
-          <div className="bg-sky-50 rounded-md p-4 space-y-2 sticky top-8">
+        <div className="w-full space-y-4 md:w-[35%]">
+          <div className="bg-sky-50 rounded-md p-4 space-y-2 ">
             <h2 className="font-black text-3xl mb-4">Price Breakdown</h2>
 
             {prices.length > 0 ? (
@@ -1295,8 +1404,21 @@ export default function Page() {
               </div>
             )}
           </div>
+          <button
+            className="w-full  px-4 py-2 bg-blue-600 rounded-md text-white font-semibold"
+            onClick={async () => {
+              const res = await generatePdf(prices); // 👈 get correct key
+              console.log(res);
+              if (res.success) {
+                window.open(res.url, "_blank");
+              } else {
+                alert(res.message);
+              }
+            }}
+          >
+            Generate PDF
+          </button>
         </div>
-        <PDF />
       </div>
     </main>
   );
